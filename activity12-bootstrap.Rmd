@@ -1,6 +1,6 @@
 ---
 title: "Activity 12"
-author: "Name"
+author: "Levi Rosendall"
 output: github_document
 ---
 
@@ -13,6 +13,11 @@ knitr::opts_chunk$set(error = TRUE)
 
 In this activity you will be bootstrapping - a form of statistical inference that uses resampling methods.
 First, you will need `{tidyverse}` and `{infer}`.
+
+```{r}
+library(tidyverse)
+library(infer)
+```
 
 
 ### Data
@@ -58,24 +63,30 @@ Our variable of interest for this Activity is going to be `educ` which is the nu
 Plot a histogram of `educ` with an overlaying density.
 Comment on the center, spread, and shape.
 
+```{r}
+gss %>% 
+  ggplot(mapping=aes(educ))+
+  geom_histogram(aes(y=..density..), bins=10)+
+  geom_density()
+```
 
 
 
-**Response**:
+**Response**: It appears to be right skewed, with a center around 14 years.
 
 
 Suppose we're interested in making inference about the typical number of years of education that a person has completed and this is our representative sample.
 Is the mean a good statistic to use here to describe the typical value of salary?
 Why or why not?
 
-**Response**:
+**Response**: No, the mean requires a distribution to appear normal, which this is not.
 
 
 Recall from your introductory statistics course that a one-sample *t*-test requires that the sample mean is Normally distributed.
 Does this assumption seem reasonable for the mean number of years of education?
 Why or why not?
 
-***Response**:
+***Response**: No, there are far more 12 years than anything else.
 
 
 Since our sample size is so large, the distribution of the *sample mean* is approximately Normal (the CLT!).
@@ -83,9 +94,12 @@ The `t.test` function can be used to do a one-sample *t*-test and to find a 90% 
 Use this function to construct a 90% confidence interval for the mean number of years of education that US adults complete.
 
 
+```{r}
+t.test(gss$educ, conf.level=0.9)
+```
 
 
-**Response**:
+**Response**: We can be 90% confident that the mean number of years of education is between 13.65 and 13.83.
 
 
 ### Bootstrapping
@@ -124,19 +138,28 @@ Then, use the appropriate `purrr::map` function to calculate the mean for each o
 The last thing you want is those samples to change every time you knit your document because your interpretations might be slightly different so you will need to set a seed that is your birthday in `yymmdd` format (your instructor's seed would be set to the number `851217`).
 
 
+```{r}
+set.seed(011115)
+many_educ <- replicate(1000, sample(gss_educ$educ, size=nrow(gss_educ), replace=TRUE), simplify=FALSE)
+meansEduc <- map_dbl(many_educ, mean)
+
+```
 
 
 
 Now, use the `quantile` function with appropriate `probs` to get construct a 90% bootstrap confidence interval for the mean number of years of education that US adults complete.
 You will need to give some thought about what the lower and upper quantiles would be to identify the middle 90%.
 
+```{r}
+quantile(meansEduc, probs=c(0.05, 0.95))
+```
 
 
 
 
 Compare this bootstrap interval to your `t.test` confidence interval from above.
 
-
+*RESPONSE:* Our t.test interval was 13.65 and 13.83, whereas the bootstrap interval was 13.64 and 13.83 so they are very similar in this case.
 
 ## Challenge: Other statistics
 
