@@ -253,16 +253,54 @@ Then, restructure this dataframe to create a faceted plot that displays
 histograms for each measure on center. You should assign this
 restructured dataframe to an R object to help you with the next task.
 
+``` r
+set.seed(011115)
+three_measure <- function(){
+  theSample <- replicate(1000, sample(gss_educ$educ, size=nrow(gss_educ), replace=TRUE), simplify=FALSE)
+  three_measure_data <- tibble(
+  mean = map_dbl(theSample, mean),
+  median = map_dbl(theSample, median),
+  midhinge = map_dbl(theSample, statip::midhinge)
+  )
+}
+three_measure_data <- three_measure()
+```
+
 Using this restructured dataframe, compute 90% bootstrap confidence
 intervals *for each* statistics. For each, compare to your interval to
 the bootstrap interval for the *mean* that you computed first.
+
+``` r
+quantile(three_measure_data$mean, probs=c(0.05, 0.95))
+```
+
+    ##       5%      95% 
+    ## 13.63856 13.82824
+
+``` r
+quantile(three_measure_data$median, probs=c(0.05, 0.95))
+```
+
+    ##  5% 95% 
+    ##  13  14
+
+``` r
+quantile(three_measure_data$midhinge, probs=c(0.05, 0.95))
+```
+
+    ##  5% 95% 
+    ##  14  14
 
 Which of these statistics do you think is the best statistic to describe
 the number of years of education? Why? There is no single right answer
 to this question. Think about what each statistic is measuring, and
 decide whether that makes sense for this data.
 
-**Response**:
+**Response**: Midhinge seems to be the best measure of center for the
+number of years of education. It captures the middle 50% of the people
+and calculates a center. In addition, it gives a number of years that is
+an integer, since people are unlikely to have an insane decimal of years
+of education.
 
 ## Liberals vs. Conservatives - Is science research necessary?
 
